@@ -6,3 +6,6 @@ build:
 
 vet:
 	go vet ./src/isubata/...
+
+restart:
+	sudo systemctl restart isubata.golang.service

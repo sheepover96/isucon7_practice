@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"path"
+	_ "net/http/pprof"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -24,6 +26,8 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
 )
+
+const BASE_PATH = "/home/isucon/isubata/webapp/public/icons"
 
 const (
 	avatarMaxBytes = 1 * 1024 * 1024
@@ -662,7 +666,12 @@ func postProfile(c echo.Context) error {
 	}
 
 	if avatarName != "" && len(avatarData) > 0 {
-		_, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
+		// _, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
+		// if err != nil {
+		// 	return err
+		// }
+		filePath := path.Join(BASE_PATH, avatarName)
+		err := ioutil.WriteFile(filePath, avatarData, 0666)
 		if err != nil {
 			return err
 		}
@@ -721,6 +730,10 @@ func tRange(a, b int64) []int64 {
 }
 
 func main() {
+	go func() {
+	               log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	e := echo.New()
 	funcs := template.FuncMap{
 		"add":    tAdd,
